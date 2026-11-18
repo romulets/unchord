@@ -1,0 +1,94 @@
+.fret-board .fret-string {
+  display: block;
+  padding: 0px;
+  margin: 0px;
+  height: 40px
+}
+
+.fret-board .fret {
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    padding: 0px 15px;
+    text-align: center;
+    border-left: 2px solid #707070;
+    background-color: #893c3c;
+    position: relative;
+    vertical-align: top;
+}
+
+.fret-board .fret:first-child {
+  border-left: 0;
+}
+
+.fret-board .fret-string:nth-child(4) .fret:nth-child(13)::after,
+.fret-board .fret-string:nth-child(4) .fret:nth-child(9)::after,
+.fret-board .fret-string:nth-child(4) .fret:nth-child(7)::after,
+
+.fret-board .fret-string:nth-child(3) .fret:nth-child(11)::after,
+.fret-board .fret-string:nth-child(5) .fret:nth-child(11)::after,
+.fret-board .fret-string:nth-child(3) .fret:nth-child(4)::after,
+.fret-board .fret-string:nth-child(5) .fret:nth-child(4)::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 5px);
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: #d0d0d0;
+  top: -3px;
+}
+
+
+.fret-board .fret-string.invalid .fret {
+  background-color: red;
+}
+
+.fret-board .fret::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background-color: #e5e5e5;
+}
+
+.fret-board .fret-string:nth-child(-n + 3) .fret::before {
+  background-color: #ffea00;
+}
+
+
+.fret-board .note {
+  position: relative;
+  z-index: 1;
+  color: #000;
+  background-color: #57bd4a;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fret-board .open-string {
+  display: inline-block;
+  align-items: center;
+  vertical-align: top;
+  width: 50px;
+  height: 40px;
+}
+
+.fret-board .open-string input {
+  margin-top: 5px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  margin-left: 2px;
+  border: 1px solid #000;
+}
+
+.fret-board .open-string .chord {
+  background-color: #57bd4a;
+}
