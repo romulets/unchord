@@ -1,18 +1,27 @@
 .scale-board {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 16px;
   padding: 0px;
 }
 
 .scale-board li {
   display: inline-block;
-  min-width: 100px;
+  width: 130px;
+  height: 20px;
   padding: 5px;
-  background-color: #f0f0f0;
+  background-color: var(--high-string-color);
 }
 
-.scale-board li.chord-note {
-  font-weight: bold;
-  background-color: #57bd4a;
+.scale-board li.tone {
+  background-color: var(--tone-color);
+}
+
+.scale-board li.bass {
+  background-color: var(--bass-color);
+}
+
+.scale-board li.tone.bass {
+  background-color: var(--tone-color);
+  outline: 2px solid var(--bass-color);
 }

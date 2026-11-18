@@ -1,7 +1,8 @@
 import Chord from "./chord";
-import { FretBoard, validateTuning, STANDARD_TUNING } from "./fret_board";
+import { FretBoard, type FretPosition, validateTuning, STANDARD_TUNING } from "./fret_board";
 
 export { Chord, FretBoard, validateTuning, STANDARD_TUNING };
+export type { FretPosition };
 
 export function getChord(chord: string) {
   return new Chord(chord);

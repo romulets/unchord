@@ -7,28 +7,67 @@ interface ScaleBoardProps {
 
 export function ScaleBoard({ chord }: ScaleBoardProps) {
 
+  const getChordRootChordClasses = () => {
+    if (!chord) return '';
+
+    const className = ['tone'];
+    if (chord.rootNote === chord.bassNote) {
+      className.push('bass');
+    }
+    return className.join(' ');
+  }
+
+  const getBassChordClasses = () => {
+    if (!chord) return '';
+
+    const className = ['bass'];
+    if (chord.rootNote === chord.bassNote) {
+      className.push('tone');
+    }
+    return className.join(' ');
+  }
+
+  const getTonesClasses = (note: Chord['scale'][number], chord?: Chord) => {
+    if (!chord) return '';
+
+    const className = [];
+    if (chord.toneDegrees.includes(note.degree)) {
+      className.push('tone');
+
+      if (chord.bassNote.pitchClass === note.pitchClass) {
+        className.push('bass');
+      }
+    }
+    return className.join(' ');
+  }
+
   return (
-  <>
-      <p>Chord: {chord?.chordSymbol}</p>
-        <ol className="scale-board">
-          <li>Scale:</li>
-          {chord?.scale.map((note, index) => (
-            <li key={index} className={chord?.toneDegrees.includes(note.degree) ? "chord-note" : ""}>{note.spelledNote}</li>
-          ))}
-        </ol>
-        <ol className="scale-board">
-          <li>Role:</li>
-          {chord?.scale.map((note, index) => (
-            <li key={index} className={chord?.toneDegrees.includes(note.degree) ? "chord-note" : ""}>{note.role}</li>
-          ))}
-        </ol>
-        <ol className="scale-board">
-          <li>Intervals:</li>
-          {chord?.scale.map((note, index) => (
-            <li key={index} className={chord?.toneDegrees.includes(note.degree) ? "chord-note" : ""}>{convertDegree(note.degree)} {note.intervalFromRoot.quality}</li>
-          ))}
-        </ol>
-        </>
+    <>
+      <ol className="scale-board">
+        <li>Chord: <b>{chord?.chordSymbol}</b></li>
+        <li className={getChordRootChordClasses()}>Root: <b>{chord?.rootNote?.spelledNote}</b></li>
+        <li className={getBassChordClasses()}>Bass: <b>{chord?.bassNote?.spelledNote}</b></li>
+      </ol>
+      
+      <ol className="scale-board">
+        <li>Scale:</li>
+        {chord?.scale.map((note, index) => (
+          <li key={index} className={getTonesClasses(note, chord)}>{note.spelledNote}</li>
+        ))}
+      </ol>
+      <ol className="scale-board">
+        <li>Role:</li>
+        {chord?.scale.map((note, index) => (
+          <li key={index} className={getTonesClasses(note, chord)}>{note.role}</li>
+        ))}
+      </ol>
+      <ol className="scale-board">
+        <li>Intervals:</li>
+        {chord?.scale.map((note, index) => (
+          <li key={index} className={getTonesClasses(note, chord)}>{convertDegree(note.degree)} {note.intervalFromRoot.quality}</li>
+        ))}
+      </ol>
+    </>
   );
 }
 

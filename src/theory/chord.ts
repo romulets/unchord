@@ -1,8 +1,5 @@
-import { ACCIDENTALS, FLAT_ACC, getPitchClass, LETTER_PITCH_CLASSES, NOTE_LETTERS, SHARP_ACC, wrapPitchClass } from "./notes";
-
-const CHORD_VALIDATION_ERROR = "Invalid chord (only supported chords are major and minor)";
-
-const MINOR_QUALITY_SYMBOLS = ["m", "min", "-"];
+import { interpretChord } from "./interpret_chord";
+import { FLAT_ACC, getPitchClass, LETTER_PITCH_CLASSES, NOTE_LETTERS, SHARP_ACC, wrapPitchClass } from "./notes";
 
 type IntervalFamily = "major" | "perfect";
 const DEGREE_INTERVAL_FAMILY: Record<number, { semitones: number, qualityClass: IntervalFamily }> = {
@@ -13,20 +10,25 @@ const DEGREE_INTERVAL_FAMILY: Record<number, { semitones: number, qualityClass: 
   5: { semitones: 7, qualityClass: "perfect" },
   6: { semitones: 9, qualityClass: "major" },
   7: { semitones: 11, qualityClass: "major" },
+  8: { semitones: 12, qualityClass: "perfect" },
 }
 
-type IntervalQuality = "perfect" | "major" | "minor" | "diminished" | "augmented";
+type IntervalQuality = "perfect" | "major" | "minor" | "diminished" | "augmented" | "doubly diminished" | "doubly augmented";
 const FAMILY_QUALITY: Record<IntervalFamily, Record<number, IntervalQuality>> = {
   perfect: {
+    [-2]: "doubly diminished",
     [-1]: "diminished",
     [0]: "perfect",
-    [1]: "augmented"
+    [1]: "augmented",
+    [2]: "doubly augmented",
   },
   major: {
+    [-3]: "doubly diminished",
     [-2]: "diminished",
     [-1]: "minor",
     [0]: "major",
-    [1]: "augmented"
+    [1]: "augmented",
+    [2]: "doubly augmented",
   }
 }
 
@@ -36,7 +38,7 @@ const SCALE_INTERVALS: Record<Scales, number[]> = {
   naturalMinor: [0, 2, 3, 5, 7, 8, 10],
 }
 
-type ChordQuality = "major" | "minor"; 
+type ChordQuality = "major" | "minor";
 const SCALES_BY_CHORD_QUALITY: Record<ChordQuality, number[]> = {
   major: SCALE_INTERVALS["major"],
   minor: SCALE_INTERVALS["naturalMinor"],
@@ -46,125 +48,141 @@ interface Interval {
   number: number,
   quality: IntervalQuality
 }
-interface ScaleDegree {
-  degree: number,
+
+interface RelativeNote {
   spelledNote: string,
   pitchClass: number,
   intervalFromRoot: Interval,
-  role: string
+}
+interface ScaleRelativeNote extends RelativeNote {
+  degree: number,
+  role: string,
 }
 
 export default class Chord {
   readonly chordSymbol: string;
+  readonly rootNote: ScaleRelativeNote;
+  readonly bassNote: RelativeNote;
+
   readonly quality: ChordQuality;
-  readonly scale: ScaleDegree[];
+  readonly scale: ScaleRelativeNote[];
   readonly toneDegrees: number[];
 
   constructor(chord: string) {
     this.chordSymbol = chord;
-    this.quality = this.validateAndFindQuality();
+    const { quality, bass, root } = this.interpretChord();
+    this.quality = quality;
     this.toneDegrees = this.buildToneDegrees();
     this.scale = this.buildScale(SCALES_BY_CHORD_QUALITY[this.quality])
+    this.rootNote = this.scale[0];
+    this.bassNote = bass == root ? this.scale[0] : this.findRelativeToRoot(this.scale[0], bass);
   }
 
-  private validateAndFindQuality() {
-    const chord = this.chordSymbol;
-    if (chord.length === 0) {
-      throw new Error(CHORD_VALIDATION_ERROR);
-    }
+  private interpretChord() {
+    const parts = interpretChord(this.chordSymbol);
 
-    for (let i = 0; i < chord.length; i++) {
-      const part = chord[i];
+    const quality = parts.some(p => p.meaning === "minor_symbol") ? "minor" : "major";
 
-      if (i === 0) {
-        if (!NOTE_LETTERS.includes(part)) {
-          throw new Error(CHORD_VALIDATION_ERROR);
-        }
-        continue;
-      }
-
-      if (i === 1) {
-        if (!ACCIDENTALS.includes(part)) {
-          // No accidental but minor
-          if (MINOR_QUALITY_SYMBOLS.includes(chord.substring(i))) {
-            return "minor";
-          }
-          throw new Error(CHORD_VALIDATION_ERROR);
-        }
-        continue;
-      }
-
-      // Any minor left
-      if (MINOR_QUALITY_SYMBOLS.includes(chord.substring(i))) {
-        return "minor";
+    let root = parts[0].part // letter of the root note
+    // iterate over the remaining parts to find accidentals for the bass note
+    for (const part of parts.slice(1)) {
+      if (part.meaning === "accidental") {
+        root += part.part;
       } else {
-        throw new Error(CHORD_VALIDATION_ERROR);
+        break;
       }
     }
 
-    return "major";
+    let bass: string;
+    if (parts.some(p => p.meaning === "bass_letter")) {
+      const bassIndex = parts.findIndex(p => p.meaning === "bass_letter");
+      bass = parts[bassIndex].part;
+      for (const part of parts.slice(bassIndex + 1)) {
+        if (part.meaning === "bass_accidental") {
+          bass += part.part;
+        } else {
+          break;
+        }
+      }
+    } else {
+      bass = root;
+    }
+
+    return { quality: quality as ChordQuality, bass, root };
+  }
+
+  // Very similar to buildScale alg.
+  // I haven't refactored because I didn't want to go back and forth with strings
+  // or creating other middle step methods. But something to look into
+  private findRelativeToRoot(root: ScaleRelativeNote, bass: string): RelativeNote {
+    const { pitchClass: rootPitchClass, letterIndex: rootLetterIndex } = getPitchClass(root.spelledNote);
+    const { pitchClass: bassPitchClass, letterIndex: bassLetterIndex } = getPitchClass(bass);
+
+    const letterDistance = (bassLetterIndex - rootLetterIndex + NOTE_LETTERS.length) % NOTE_LETTERS.length;
+    const semitoneDistance = wrapPitchClass(bassPitchClass - rootPitchClass);
+
+    // We are correcting for octaves. We measure distance going up from the root note,
+    // if letter distance is 0 and semitone distance is greater than 6, 
+    // it is because we went full circle and the bass is an octave above the root
+    const intervalNumber = letterDistance == 0 && semitoneDistance > 6 ? 8 : letterDistance + 1;
+
+    const spelledNote = bass;
+    const pitchClass = bassPitchClass;
+    const intervalFromRoot =this.getIntervalFromRoot(intervalNumber, semitoneDistance)
+
+    return {
+      pitchClass,
+      spelledNote,
+      intervalFromRoot,
+    };
   }
 
   private buildScale(intervalSizes: number[]) {
-    // chordSymbol: E
-    // rootPitchClass: 4
-    // rootLetterIndex: 2
     const { pitchClass: rootPitchClass, letterIndex: rootLetterIndex } = getPitchClass(this.chordSymbol);
-    const scale: ScaleDegree[] = [];
+    const scale: ScaleRelativeNote[] = [];
 
-    // i: 2
-    for (let i = 0; i < NOTE_LETTERS.length; i++) {      
-      // targetLetterPos: 4
-      const targetLetterPos = (rootLetterIndex + i) % NOTE_LETTERS.length;
-      // targetLetter: G
-      const targetLetter = NOTE_LETTERS[targetLetterPos];
-      // targetLetterPitchClass: 7
-      const targetLetterPitchClass = LETTER_PITCH_CLASSES[targetLetterPos];
-      // semitoneDistanceToRoot: 4
-      const semitoneDistanceToRoot = intervalSizes[i];
-
-      // degree: 3
+    for (let i = 0; i < NOTE_LETTERS.length; i++) {
       const degree = i + 1;
-      // pitchClass: 8
-      const pitchClass = wrapPitchClass(rootPitchClass + semitoneDistanceToRoot);
-      // spelledNote: G#
-      const spelledNote = this.getSpelledNote(pitchClass, targetLetterPitchClass, targetLetter);
-      // intervalFromRoot: major 3rd
-      const intervalFromRoot = this.getIntervalFromRoot(degree, semitoneDistanceToRoot);
-      // role: third
       const role = convertToRole(degree);
+      
+      const targetLetterPos = (rootLetterIndex + i) % NOTE_LETTERS.length;
+      const targetLetter = NOTE_LETTERS[targetLetterPos];
+      const targetLetterPitchClass = LETTER_PITCH_CLASSES[targetLetterPos];
+      const semitoneDistanceToRoot = intervalSizes[i];
+      
+      const pitchClass = wrapPitchClass(rootPitchClass + semitoneDistanceToRoot);
+      const spelledNote = this.getSpelledNote(pitchClass, targetLetterPitchClass, targetLetter);
+      const intervalFromRoot = this.getIntervalFromRoot(degree, semitoneDistanceToRoot);
+      const relativeNote: RelativeNote = {
+          pitchClass,
+          spelledNote,
+          intervalFromRoot,
+      }
 
       scale.push({
         degree,
-        pitchClass,
-        spelledNote,
-        intervalFromRoot,
-        role
+        role,
+        ...relativeNote
       });
     }
 
     return scale;
   }
 
-  private getIntervalFromRoot(degree: number, semitonesDifference: number): Interval {
-    const { semitones: semitonesReference, qualityClass } = DEGREE_INTERVAL_FAMILY[degree];
-    const difference = semitonesDifference - semitonesReference;
+  private getIntervalFromRoot(intervalNumber: number, semitonesDifference: number): Interval {
+    const { semitones: semitonesReference, qualityClass } = DEGREE_INTERVAL_FAMILY[intervalNumber];
+    const difference = normalizeDifference(semitonesDifference - semitonesReference);
     const quality = FAMILY_QUALITY[qualityClass][difference];
-
+    
     if (quality === undefined) {
-      throw new Error(`Invalid quality for semitones difference: ${degree}, ${semitonesDifference} semitones`);
+      throw new Error(`Invalid quality for semitones difference: ${intervalNumber}, ${difference} semitones`);
     }
 
-    return {number: degree, quality};
+    return { number: intervalNumber, quality };
   }
 
   private getSpelledNote(pitchClass: number, targetLetterPitchClass: number, targetLetter: string) {
-    let accidental = (pitchClass - targetLetterPitchClass) % 12;
-    if (accidental > 6) {
-      accidental -= 12;
-    } else if (accidental < -6) {
-      accidental += 12;
-    }
+    const accidental = normalizeDifference((pitchClass - targetLetterPitchClass) % 12);
 
     if (accidental === 0) {
       return targetLetter;
@@ -187,7 +205,7 @@ export default class Chord {
     return [1, 3, 5];
   }
 
-  public getTones(): ScaleDegree[] {
+  public getTones(): ScaleRelativeNote[] {
     return this.toneDegrees.map(degree => this.scale.find(sd => sd.degree === degree)!);
   }
 }
@@ -216,4 +234,13 @@ function convertToRole(n: number) {
     default:
       return `${n}th`;
   }
+}
+
+function normalizeDifference(difference: number): number {
+   if (difference > 6) {
+      return difference - 12;
+    } else if (difference < -6) {
+      return difference + 12;
+    }
+    return difference;
 }

@@ -20,11 +20,11 @@ function App() {
     }
 
     try {
-      setChord(getChord(e.target.value));
+      const newChord = getChord(e.target.value);
+      setChord(newChord);
       setError(undefined);
     } catch (err) {
       setError((err as Error).message);
-      setChord(undefined);
     }
     
   };
@@ -32,11 +32,10 @@ function App() {
   return (
     <>
       <h1>Unchord</h1>
-      <form>
-          <input type="text" placeholder="Enter chord" value={chordInput} onChange={(handleChordChange)} />
+      <form onSubmit={(e) => e.preventDefault()}>
+          <input type="text" placeholder="Enter chord" value={chordInput} onChange={(handleChordChange)} className="chord-input" />
+          {error && <span className="error">{error}</span>}
       </form>
-
-      {error && <p className="error">{error}</p>}
       
       <ScaleBoard chord={chord} />
       <FretBoard chord={chord} />

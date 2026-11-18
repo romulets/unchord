@@ -15,6 +15,7 @@ export interface FretPosition {
   pitchClass: number;
   note?: string;
   tone: boolean;
+  bass: boolean;
 }
 
 export class FretBoard {
@@ -35,8 +36,8 @@ export class FretBoard {
   private buildBoard(tuning: string[], chord?: Chord): FretPosition[][] {
     const board: FretPosition[][] = [];
 
-    for (const idx in tuning) {
-      const openString = tuning[idx];
+    for (let i = 0; i < tuning.length; i++) {
+      const openString = tuning[i];
       board.push(this.buildString(openString, chord));
     }
     return board;
@@ -51,13 +52,21 @@ export class FretBoard {
 
     const frets: FretPosition[] = [];
     for (let fret = 0; fret < FRETS; fret++) {
+      
       const pitchClass = wrapPitchClass(openStringPitchClass + fret);
+      const bass = pitchClass === chord?.bassNote.pitchClass;
+
       if (pitchClassIndex && pitchClassIndex[pitchClass]) {
-        frets.push({ pitchClass, tone: true, note: pitchClassIndex[pitchClass].spelledNote });
+        frets.push({ pitchClass, tone: true, note: pitchClassIndex[pitchClass].spelledNote, bass });
         continue;
       }
 
-      frets.push({ pitchClass, tone: false });
+      if (bass) {
+        frets.push({ pitchClass, tone: false, bass, note: chord?.bassNote.spelledNote });
+        continue;
+      }
+
+      frets.push({ pitchClass, tone: false, bass: false,});
     }
     return frets.reverse();
   }

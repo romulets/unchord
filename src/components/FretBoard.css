@@ -11,8 +11,8 @@
     line-height: 40px;
     padding: 0px 15px;
     text-align: center;
-    border-left: 2px solid #707070;
-    background-color: #893c3c;
+    border-left: 2px solid var(--fret-division-color);
+    background-color: var(--fret-color);
     position: relative;
     vertical-align: top;
 }
@@ -35,13 +35,12 @@
   border-radius: 50%;
   width: 10px;
   height: 10px;
-  background-color: #d0d0d0;
+  background-color: var(--fret-division-color);
   top: -3px;
 }
 
-
 .fret-board .fret-string.invalid .fret {
-  background-color: red;
+  background-color: var(--invalid-fret-color);
 }
 
 .fret-board .fret::before {
@@ -51,25 +50,35 @@
   right: 0;
   top: 50%;
   height: 2px;
-  background-color: #e5e5e5;
+  background-color: var(--high-string-color);
 }
 
 .fret-board .fret-string:nth-child(-n + 3) .fret::before {
-  background-color: #ffea00;
+  background-color: var(--low-string-color);
 }
 
-
-.fret-board .note {
+.fret-board span.note {
   position: relative;
   z-index: 1;
-  color: #000;
-  background-color: #57bd4a;
   border-radius: 50%;
   width: 30px;
   height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.fret-board .tone {
+  background-color: var(--tone-color);
+}
+
+.fret-board .bass {
+  background-color: var(--bass-color);
+}
+
+.fret-board .tone.bass {
+  background-color: var(--tone-color);
+  outline: 2px solid var(--bass-color);
 }
 
 .fret-board .open-string {
@@ -87,8 +96,4 @@
   text-align: center;
   margin-left: 2px;
   border: 1px solid #000;
-}
-
-.fret-board .open-string .chord {
-  background-color: #57bd4a;
 }
