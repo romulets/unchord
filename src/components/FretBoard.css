@@ -76,8 +76,17 @@
   background-color: var(--bass-color);
 }
 
+.fret-board .root {
+  background-color: var(--root-color);
+}
+
 .fret-board .tone.bass {
   background-color: var(--tone-color);
+  outline: 2px solid var(--bass-color);
+}
+
+.fret-board .root.bass {
+  background-color: var(--root-color);
   outline: 2px solid var(--bass-color);
 }
 

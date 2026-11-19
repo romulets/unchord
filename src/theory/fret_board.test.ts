@@ -3,18 +3,13 @@ import { FretBoard } from "./fret_board";
 import { getPitchClass } from "./notes";
 import Chord from "./chord";
 
-
-// empty position
-const empty = (note: string) => ({pitchClass: getPitchClass(note).pitchClass, tone: false, bass: false});
-
-// position with tone
-const tone = (note: string) => ({pitchClass: getPitchClass(note).pitchClass, tone: true, note, bass: false});
-
-// position with a tone
-const toneBass = (note: string) => ({pitchClass: getPitchClass(note).pitchClass, tone: true, note, bass: true});
-
-// position with a bass but not tone
-const onlyBass = (note: string) => ({pitchClass: getPitchClass(note).pitchClass, tone: false, note, bass: true});
+const pos = (note: string, roles: string[], ) => ({pitchClass: getPitchClass(note).pitchClass, roles, spelledNote: roles.length > 0 ? note : undefined});
+const empty = (note: string) => pos(note, []);
+const tone = (note: string) => pos(note, ["tone"]);
+const root = (note: string) => pos(note, ["root", "tone"]);
+const rootBass = (note: string) => pos(note, ["bass", "root", "tone",]);
+const toneBass = (note: string) => pos(note, ["bass", "tone"]);
+const onlyBass = (note: string) => pos(note, ["bass"]);
 
 describe("FretBoard", () => {
   it("should build a standard tuning board correctly", () => {
@@ -53,12 +48,12 @@ describe("FretBoard", () => {
     const board = new FretBoard({chord: new Chord("C")});
 
     expect(board.board).toStrictEqual([
-      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    toneBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
-      [toneBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    toneBass("C"),  empty("B"),     empty("A#"),    empty("A")],
-      [empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    toneBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D")],
-      [empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    toneBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G")],
-      [empty("D"),     empty("C#"),    toneBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    toneBass("C"),  empty("B")],
-      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    toneBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
+      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    rootBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
+      [rootBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    rootBass("C"),  empty("B"),     empty("A#"),    empty("A")],
+      [empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    rootBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D")],
+      [empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    rootBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G")],
+      [empty("D"),     empty("C#"),    rootBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    rootBass("C"),  empty("B")],
+      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    rootBass("C"),  empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
     ]);
   });
 
@@ -66,12 +61,25 @@ describe("FretBoard", () => {
     const board = new FretBoard({chord: new Chord("C/Bb")});
 
     expect(board.board).toStrictEqual([
-      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    tone("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
-      [tone("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    tone("C"),      empty("B"),     onlyBass("Bb"), empty("A")],
-      [empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    tone("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D")],
-      [onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    tone("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G")],
-      [empty("D"),     empty("C#"),    tone("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    tone("C"),      empty("B")],
-      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    tone("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
+      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
+      [root("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     onlyBass("Bb"), empty("A")],
+      [empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D")],
+      [onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G")],
+      [empty("D"),     empty("C#"),    root("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B")],
+      [tone("G"),      empty("F#"),    empty("F"),     tone("E"),      empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     onlyBass("Bb"), empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     tone("E")],
+    ]);
+  });
+
+   it("match notes C/E", () => {
+    const board = new FretBoard({chord: new Chord("C/E")});
+
+    expect(board.board).toStrictEqual([
+      [tone("G"),      empty("F#"),    empty("F"),     toneBass("E"),  empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     toneBass("E")],
+      [root("C"),      empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     toneBass("E"),  empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     empty("A#"),    empty("A")],
+      [empty("F"),     toneBass("E"),  empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     toneBass("E"),  empty("D#"),    empty("D")],
+      [empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     toneBass("E"),  empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G")],
+      [empty("D"),     empty("C#"),    root("C"),      empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     toneBass("E"),  empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B")],
+      [tone("G"),      empty("F#"),    empty("F"),     toneBass("E"),  empty("D#"),    empty("D"),     empty("C#"),    root("C"),      empty("B"),     empty("A#"),    empty("A"),     empty("G#"),    tone("G"),      empty("F#"),    empty("F"),     toneBass("E")],
     ]);
   });
 
@@ -79,12 +87,12 @@ describe("FretBoard", () => {
     const board = new FretBoard({chord: new Chord("Cb")});
 
     expect(board.board).toStrictEqual([
-      [empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E")],
-      [empty("C"),     toneBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb"), empty("A#"),    empty("A")],
-      [empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D")],
-      [empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G")],
-      [empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb")],
-      [empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     toneBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E")],
+      [empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E")],
+      [empty("C"),     rootBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb"), empty("A#"),    empty("A")],
+      [empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D")],
+      [empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G")],
+      [empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb")],
+      [empty("G"),     tone("Gb"),     empty("F"),     empty("E"),     tone("Eb"),     empty("D"),     empty("C#"),    empty("C"),     rootBass("Cb"), empty("A#"),    empty("A"),     empty("G#"),    empty("G"),     tone("Gb"),     empty("F"),     empty("E")],
     ]);
   });
 });

@@ -32,26 +32,23 @@ export function FretBoard({ chord }: FretBoardProps) {
     setActualTuning(newTuning);
   };
 
+  const getRepresentationFretPositionRoles = (position: FretPosition, stringIndex: number) => {
+    if (stringIndex > 2) {
+      return position.roles.filter(role => role !== "bass");
+    }
+    return position.roles;
+  };
+
   const getFretPositionClass = (position: FretPosition, stringIndex: number) => {
     if (!chord) {
       return "";
     }
 
-    const classNames = ['note'];
-
-    if (position.bass && stringIndex <= 2) {
-      classNames.push("bass");
-    }
-
-    if (position.tone) {
-      classNames.push("tone");
-    }
-  
-    return classNames.join(' ');
+    return ['note', ...getRepresentationFretPositionRoles(position, stringIndex)].join(' ')
   };
 
   const displayPosition = (position: FretPosition, stringIndex: number) => {
-    return position.tone || (position.bass && stringIndex <= 2);
+    return getRepresentationFretPositionRoles(position, stringIndex).length > 0;
   };
 
   const openString = (i: number) => (board.board[i][board.board[i].length - 1]) 
@@ -62,7 +59,7 @@ export function FretBoard({ chord }: FretBoardProps) {
         <ol key={stringIndex} className={['fret-string', invalidTuningStrings.includes(stringIndex) ? 'invalid' : ''].join(' ')}>
           {string.slice(0, string.length - 1).map((position, fretIndex) => (
             <li key={fretIndex} className="fret" style={{ width: `${MAX_FRET_SIZE_PX * (FRET_SIZE_RATIO ** (string.length - fretIndex))}px` }}>
-              {displayPosition(position, stringIndex) && <span className={getFretPositionClass(position, stringIndex)}>{position.note}</span>}
+              {displayPosition(position, stringIndex) && <span className={getFretPositionClass(position, stringIndex)}>{position.spelledNote}</span>}
             </li>
           ))}
 

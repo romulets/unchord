@@ -10,7 +10,7 @@ export function ScaleBoard({ chord }: ScaleBoardProps) {
   const getChordRootChordClasses = () => {
     if (!chord) return '';
 
-    const className = ['tone'];
+    const className = ['tone', 'root'];
     if (chord.rootNote === chord.bassNote) {
       className.push('bass');
     }
@@ -22,7 +22,7 @@ export function ScaleBoard({ chord }: ScaleBoardProps) {
 
     const className = ['bass'];
     if (chord.rootNote === chord.bassNote) {
-      className.push('tone');
+      className.push('tone', 'root');
     }
     return className.join(' ');
   }
@@ -36,6 +36,10 @@ export function ScaleBoard({ chord }: ScaleBoardProps) {
 
       if (chord.bassNote.pitchClass === note.pitchClass) {
         className.push('bass');
+      }
+
+      if (chord.rootNote.pitchClass === note.pitchClass) {
+        className.push('root');
       }
     }
     return className.join(' ');

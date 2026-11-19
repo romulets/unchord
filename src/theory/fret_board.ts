@@ -11,11 +11,11 @@ interface FretBoardProps {
   chord?: Chord;
 }
 
+export type PositionRole = "root" | "bass" | "tone"; 
 export interface FretPosition {
   pitchClass: number;
-  note?: string;
-  tone: boolean;
-  bass: boolean;
+  spelledNote?: string;
+  roles: PositionRole[];
 }
 
 export class FretBoard {
@@ -52,21 +52,25 @@ export class FretBoard {
 
     const frets: FretPosition[] = [];
     for (let fret = 0; fret < FRETS; fret++) {
-      
       const pitchClass = wrapPitchClass(openStringPitchClass + fret);
-      const bass = pitchClass === chord?.bassNote.pitchClass;
+      
+      const roles: PositionRole[] = [];
+      let { spelledNote } = pitchClassIndex?.[pitchClass] ?? {};
+      
+      if (pitchClass === chord?.bassNote.pitchClass) {
+        roles.push("bass");
+        ({ spelledNote } = chord.bassNote);
+      }
+
+      if (pitchClass === chord?.rootNote.pitchClass) {
+          roles.push("root");
+      }
 
       if (pitchClassIndex && pitchClassIndex[pitchClass]) {
-        frets.push({ pitchClass, tone: true, note: pitchClassIndex[pitchClass].spelledNote, bass });
-        continue;
+        roles.push("tone");
       }
 
-      if (bass) {
-        frets.push({ pitchClass, tone: false, bass, note: chord?.bassNote.spelledNote });
-        continue;
-      }
-
-      frets.push({ pitchClass, tone: false, bass: false,});
+      frets.push({ pitchClass, roles, spelledNote });
     }
     return frets.reverse();
   }

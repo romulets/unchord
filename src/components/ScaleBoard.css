@@ -21,7 +21,16 @@
   background-color: var(--bass-color);
 }
 
+.scale-board li.root {
+  background-color: var(--root-color);
+}
+
 .scale-board li.tone.bass {
   background-color: var(--tone-color);
+  outline: 2px solid var(--bass-color);
+}
+
+.scale-board li.root.bass {
+  background-color: var(--root-color);
   outline: 2px solid var(--bass-color);
 }
