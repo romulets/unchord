@@ -1,5 +1,13 @@
-import { interpretChord } from "./interpret_chord";
+import { interpretChord, type ChordPart } from "./interpret_chord";
 import { FLAT_ACC, getPitchClass, LETTER_PITCH_CLASSES, NOTE_LETTERS, SHARP_ACC, wrapPitchClass } from "./notes";
+
+const TRIAD_DEGREES = [1, 3, 5];
+
+const EXTENSIONS = ["7", "9", "11", "13"];
+const EXTENSION_MODIFIER: Record<string, ((parts: ChordPart[]) => number)> = {
+  // Seventh by default is a minor, if there is a seventh marker, it's a major
+  "7": (parts) => parts.some(p => p.meaning === "major_seventh_marker") ? 0 : 1 
+}
 
 type IntervalFamily = "major" | "perfect";
 const DEGREE_INTERVAL_FAMILY: Record<number, { semitones: number, qualityClass: IntervalFamily }> = {
@@ -53,6 +61,8 @@ export interface RelativeNote {
   spelledNote: string,
   pitchClass: number,
   intervalFromRoot: Interval,
+  tone: boolean,
+  extension?: boolean,
 }
 interface ScaleRelativeNote extends RelativeNote {
   degree: number,
@@ -65,29 +75,34 @@ interface Inversion {
 
 export default class Chord {
   readonly chordSymbol: string;
+  readonly parts: ChordPart[];
+
   readonly rootNote: ScaleRelativeNote;
   readonly bassNote: RelativeNote;
+  readonly extensions?: RelativeNote[];
+  readonly tones: RelativeNote[];
 
   readonly quality: ChordQuality;
   readonly scale: ScaleRelativeNote[];
-  readonly toneDegrees: number[];
   readonly inversion?: Inversion;
 
   constructor(chord: string) {
     this.chordSymbol = chord;
-    const { quality, bass, root } = this.interpretChord();
+    const { quality, bass, root, parts } = this.interpretChord();
+    this.parts = parts;
     this.quality = quality;
-    this.toneDegrees = this.buildToneDegrees();
     this.scale = this.buildScale(SCALES_BY_CHORD_QUALITY[this.quality])
     this.rootNote = this.scale[0];
     this.bassNote = bass == root ? this.scale[0] : this.findRelativeToRoot(this.scale[0], bass);
-    this.inversion = this.determineInversion(); 
+    this.extensions = this.buildExtensions(this.scale[0], parts);
+    this.tones = this.buildTones();
+    this.inversion = this.buildInversion(); 
   }
 
   private interpretChord() {
     const parts = interpretChord(this.chordSymbol);
 
-    const quality = parts.some(p => p.meaning === "minor_symbol") ? "minor" : "major";
+    const quality = parts.some(p => p.meaning === "minor_quality") ? "minor" : "major";
 
     let root = parts[0].part // letter of the root note
     // iterate over the remaining parts to find accidentals for the bass note
@@ -114,8 +129,77 @@ export default class Chord {
       bass = root;
     }
 
-    return { quality: quality as ChordQuality, bass, root };
+    return { quality: quality as ChordQuality, bass, root, parts };
   }
+
+   private buildExtensions(root: RelativeNote, parts: ChordPart[]): RelativeNote[] {
+      const extensionPart = parts.find(p => p.meaning === "extension");
+      if (!extensionPart) {
+        return [];
+      }
+
+      const extensions: RelativeNote[] = [];
+
+      const extensionModifiers: Record<string, number> = {};
+      const extensionPosition = EXTENSIONS.indexOf(extensionPart.part);
+      if (extensionPosition === -1) {
+        throw new Error(`Not supported chord extension ${extensionPart.part}`);
+      }
+
+      for (let i = 0; i <= extensionPosition; i++) {
+        const extension = EXTENSIONS[i];
+        const modifier = EXTENSION_MODIFIER[extension];
+        extensionModifiers[extension] =  modifier ? modifier(parts) : 0;
+      }
+
+      const { pitchClass: rootPitchClass, letterIndex: rootLetterIndex } = getPitchClass(root.spelledNote);
+
+      const extensionNumbers = Object.keys(extensionModifiers).map((k) => parseInt(k)).sort((a,b) => a - b);
+      for (const extensionNumber of extensionNumbers) {
+        const minorModifier = extensionModifiers[String(extensionNumber)];
+        // is major than 7?
+        const compoundNumber = extensionNumber > NOTE_LETTERS.length;
+        // If compound, reduce to a known degree in the reference table
+        const normalizedExtension = compoundNumber ? extensionNumber - NOTE_LETTERS.length : extensionNumber;
+        // Fetch the simple distance
+        const normalizedDistance = DEGREE_INTERVAL_FAMILY[normalizedExtension].semitones - minorModifier;
+        // Add the distance if needed
+        const semitoneDistance = compoundNumber ? normalizedDistance + DEGREE_INTERVAL_FAMILY[NOTE_LETTERS.length + 1].semitones : normalizedDistance;
+        
+        const targetLetterIndex = (rootLetterIndex + normalizedExtension - 1) % NOTE_LETTERS.length;
+        const targetLetter = NOTE_LETTERS[targetLetterIndex];
+        const targetPitchClass = wrapPitchClass(rootPitchClass + semitoneDistance)
+
+        const referencePitchClass = LETTER_PITCH_CLASSES[targetLetterIndex];
+
+        const spelledNote = this.getSpelledNote(targetPitchClass, referencePitchClass, targetLetter);
+        const intervalFromRoot = this.getIntervalFromRoot(normalizedExtension, normalizedDistance);
+
+        let tone = false;
+        if (extensionNumber <= 7) {
+          const scaleNote = this.scale[extensionNumber - 1];
+          tone = scaleNote.intervalFromRoot.number === intervalFromRoot.number
+                  && scaleNote.intervalFromRoot.quality === intervalFromRoot.quality;
+        
+          if (tone) {
+            // Fine with the mutation and not adding to the extensions (tensions).
+            scaleNote.extension = true;
+            scaleNote.tone = true;
+            continue;
+          }
+        }
+
+          extensions.push({
+            pitchClass: targetPitchClass,
+            spelledNote,
+            intervalFromRoot: {...intervalFromRoot, number: extensionNumber},
+            tone,
+            extension: true,
+        });
+      }
+      return extensions;
+  }
+
 
   // Very similar to buildScale alg.
   // I haven't refactored because I didn't want to go back and forth with strings
@@ -134,12 +218,13 @@ export default class Chord {
 
     const spelledNote = bass;
     const pitchClass = bassPitchClass;
-    const intervalFromRoot =this.getIntervalFromRoot(intervalNumber, semitoneDistance)
+    const intervalFromRoot = this.getIntervalFromRoot(intervalNumber, semitoneDistance)
 
     return {
       pitchClass,
       spelledNote,
       intervalFromRoot,
+      tone: spelledNote === root.spelledNote
     };
   }
 
@@ -163,12 +248,13 @@ export default class Chord {
           pitchClass,
           spelledNote,
           intervalFromRoot,
+          tone: TRIAD_DEGREES.includes(degree)
       }
 
       scale.push({
+        ...relativeNote,
         degree,
         role,
-        ...relativeNote
       });
     }
 
@@ -206,21 +292,22 @@ export default class Chord {
     return spelledNote;
   }
 
-  private buildToneDegrees(): number[] {
-    // Always a triad for now
-    return [1, 3, 5];
+
+  public buildTones(): RelativeNote[] {
+    const tones = this.scale.filter(n => n.tone);
+    if (!this.extensions) {
+      return tones;
+    }
+
+    return [...tones, ...this.extensions];
   }
 
-  public getTones(): ScaleRelativeNote[] {
-    return this.toneDegrees.map(degree => this.scale.find(sd => sd.degree === degree)!);
-  }
-
-  private determineInversion(): Inversion | undefined {
+  private buildInversion(): Inversion | undefined {
     if (this.rootNote === this.bassNote) {
       return undefined;
     }
 
-    const bassDegree = this.getTones().find(sd => sd.spelledNote === this.bassNote.spelledNote)?.degree;
+    const bassDegree = this.tones.find(sd => sd.spelledNote === this.bassNote.spelledNote)?.intervalFromRoot.number;
     switch(bassDegree) {
       case 3:
         return { degree: 1 };

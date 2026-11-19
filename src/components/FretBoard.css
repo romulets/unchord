@@ -80,6 +80,15 @@
   background-color: var(--root-color);
 }
 
+.fret-board .extension {
+  background-color: var(--extension-color);
+}
+
+.fret-board .tone.extension {
+  background-color: var(--tone-color);
+  outline: 2px solid var(--extension-color);
+}
+
 .fret-board .tone.bass {
   background-color: var(--tone-color);
   outline: 2px solid var(--bass-color);

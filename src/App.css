@@ -4,11 +4,12 @@
   --invalid-fret-color: #ff0000;
 
   --low-string-color: #ffea00;
-  --high-string-color: #e5e5e5;
+  --high-string-color: #f3f3f3;
 
   --tone-color: #57bd4a;
-  --bass-color: #ff0000;
+  --bass-color: #ff22f4;
   --root-color: #f7ff19;
+  --extension-color: #54ffee;
 
   font-family: system-ui;
 }

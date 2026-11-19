@@ -11,7 +11,7 @@ interface FretBoardProps {
   chord?: Chord;
 }
 
-export type PositionRole = "root" | "bass" | "tone"; 
+export type PositionRole = "root" | "bass" | "tone" | "extension" | "tension"; 
 export interface FretPosition {
   pitchClass: number;
   spelledNote?: string;
@@ -46,7 +46,7 @@ export class FretBoard {
   private buildString(openString: string, chord?: Chord): FretPosition[] {
     const { pitchClass: openStringPitchClass } = getPitchClass(openString);
 
-    const pitchClassIndex = chord?.getTones()
+    const pitchClassIndex = chord?.tones
       .map(tone => ({ [tone.pitchClass]: tone }))
       .reduce((acc, incoming) => ({ ...acc, ...incoming }), {});
 
@@ -67,7 +67,14 @@ export class FretBoard {
       }
 
       if (pitchClassIndex && pitchClassIndex[pitchClass]) {
-        roles.push("tone");
+        const tone = pitchClassIndex[pitchClass];
+        if (tone.tone) {
+          roles.push("tone");
+        }
+
+        if (tone.extension) {
+          roles.push("extension");
+        }
       }
 
       frets.push({ pitchClass, roles, spelledNote });

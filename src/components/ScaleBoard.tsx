@@ -22,6 +22,9 @@ export function ScaleBoard({ chord }: ScaleBoardProps) {
         {chord?.scale.map((note, index) => (
           <li key={index} className={getTonesClasses(note, chord)}>{note.spelledNote}</li>
         ))}
+        {chord?.extensions?.map((note, index) => (
+          <li key={`extension-${index}`} className={getTonesClasses(note, chord)}>{note.spelledNote}</li>
+        ))}
       </ol>
       <ol className="scale-board">
         <li>Role:</li>
@@ -33,6 +36,10 @@ export function ScaleBoard({ chord }: ScaleBoardProps) {
         <li>Intervals:</li>
         {chord?.scale.map((note, index) => (
           <li key={index} className={getTonesClasses(note, chord)}>{getIntervalStr(note)}</li>
+        ))}
+
+        {chord?.extensions?.map((note, index) => (
+          <li key={`extension-${index}`} className={getTonesClasses(note, chord)}>{getIntervalStr(note)}</li>
         ))}
       </ol>
     </>
@@ -48,7 +55,7 @@ function convertIntervalDegree(n: number) {
 }
 
 function convertDegree(n: number) {
-  const rules = new Intl.PluralRules();
+  const rules = new Intl.PluralRules("en-US", { type: "ordinal" });
   switch (rules.select(n)) {
     case 'one':
       return "1st";
@@ -62,70 +69,76 @@ function convertDegree(n: number) {
 }
 
 const isBassRoot = (chord?: Chord) => {
-    return chord && chord?.rootNote === chord?.bassNote
+  return chord && chord?.rootNote === chord?.bassNote
+}
+
+const getChordRootChordClasses = (chord?: Chord) => {
+  if (!chord) return '';
+
+  const className = ['tone', 'root'];
+  if (isBassRoot(chord)) {
+    className.push('bass');
+  }
+  return className.join(' ');
+}
+
+const getBassChordClasses = (chord?: Chord) => {
+  if (!chord) return '';
+
+  const className = ['bass'];
+  if (isBassRoot(chord)) {
+    className.push('root');
   }
 
-  const getChordRootChordClasses = (chord?: Chord) => {
-    if (!chord) return '';
+  if (isBassTone(chord)) {
+    className.push('tone');
+  }
 
-    const className = ['tone', 'root'];
-    if (isBassRoot(chord)) {
+  return className.join(' ');
+}
+
+const isBassTone = (chord?: Chord) => {
+  return chord?.tones.some(tone => tone.spelledNote === chord.bassNote.spelledNote);
+}
+
+const getIntervalStr = (note: RelativeNote) => {
+  return `${note.intervalFromRoot.quality} ${convertIntervalDegree(note.intervalFromRoot.number)}`;
+}
+
+const getBassExplanation = (chord?: Chord) => {
+  if (!chord || isBassRoot(chord)) return null;
+
+  if (!isBassTone(chord)) {
+    return (
+      <span className="explanation">({getIntervalStr(chord.bassNote)})</span>
+    )
+  }
+
+  if (chord.inversion) {
+    return (<span className="explanation">({convertDegree(chord.inversion.degree)} inversion)</span>)
+  }
+}
+
+const getTonesClasses = (note: RelativeNote, chord?: Chord) => {
+  if (!chord) return '';
+
+  const className = [];
+  if (note.tone) {
+    className.push('tone');
+
+    if (chord.bassNote.pitchClass === note.pitchClass) {
       className.push('bass');
     }
-    return className.join(' ');
-  }
 
-  const getBassChordClasses = (chord?: Chord) => {
-    if (!chord) return '';
-
-    const className = ['bass'];
-    if (isBassRoot(chord)) {
+    if (chord.rootNote.pitchClass === note.pitchClass) {
       className.push('root');
     }
-
-    if (isBassTone(chord)) {
-      className.push('tone');
-    }
-
-    return className.join(' ');
   }
 
-  const isBassTone = (chord?: Chord) => {
-    return chord?.getTones().some(tone => tone.spelledNote === chord.bassNote.spelledNote);
+  if (note.extension) {
+    className.push('extension');
   }
 
-  const getIntervalStr = (note: RelativeNote) => {
-    return `${note.intervalFromRoot.quality} ${convertIntervalDegree(note.intervalFromRoot.number)}`;
-  }
+  return className.join(' ');
+}
 
-  const getBassExplanation = (chord?: Chord) => {
-    if (!chord || isBassRoot(chord)) return null;
-
-    if (!isBassTone(chord)) {
-      return (
-        <span className="explanation">({getIntervalStr(chord.bassNote)})</span>
-      )
-    }
-
-    if (chord.inversion) {
-      return (<span className="explanation">({convertDegree(chord.inversion.degree)} inversion)</span>)
-    }
-  }
-
-  const getTonesClasses = (note: Chord['scale'][number], chord?: Chord) => {
-    if (!chord) return '';
-
-    const className = [];
-    if (chord.toneDegrees.includes(note.degree)) {
-      className.push('tone');
-
-      if (chord.bassNote.pitchClass === note.pitchClass) {
-        className.push('bass');
-      }
-
-      if (chord.rootNote.pitchClass === note.pitchClass) {
-        className.push('root');
-      }
-    }
-    return className.join(' ');
-  }

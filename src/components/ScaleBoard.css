@@ -1,9 +1,10 @@
 .scale-board {
   display: flex;
-  gap: 10px;
+  gap: 5px;
   margin-bottom: 5px;
   margin-top: 0px;
   padding: 0px;
+  font-size: 0.9em;
 }
 
 .scale-board:first-of-type {
@@ -16,7 +17,7 @@
 
 .scale-board li {
   display: inline-block;
-  width: 130px;
+  width: 120px;
   height: 20px;
   padding: 5px;
   background-color: var(--high-string-color);
@@ -35,6 +36,10 @@
   background-color: var(--root-color);
 }
 
+.scale-board li.extension {
+  background-color: var(--extension-color);
+}
+
 .scale-board li.tone.bass {
   background-color: var(--tone-color);
   outline: 2px solid var(--bass-color);
@@ -43,6 +48,11 @@
 .scale-board li.root.bass {
   background-color: var(--root-color);
   outline: 2px solid var(--bass-color);
+}
+
+.scale-board li.tone.extension {
+  background-color: var(--tone-color);
+  outline: 2px solid var(--extension-color);
 }
 
 .scale-board li .explanation {

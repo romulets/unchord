@@ -44,7 +44,7 @@ describe("interpretChords", () => {
     it("Cm", () => {
       expect(interpretChord("Cm")).toEqual([
         { part: "C", meaning: "root_letter" },
-        { part: "m", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
       ]);
     });
 
@@ -53,7 +53,7 @@ describe("interpretChords", () => {
         { part: "B", meaning: "root_letter" },
         { part: "#", meaning: "accidental" },
         { part: "#", meaning: "accidental" },
-        { part: "m", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
       ]);
     });
 
@@ -61,7 +61,7 @@ describe("interpretChords", () => {
       expect(interpretChord("F#min")).toEqual([
         { part: "F", meaning: "root_letter" },
         { part: "#", meaning: "accidental" },
-        { part: "min", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
       ]);
     });
 
@@ -70,12 +70,12 @@ describe("interpretChords", () => {
         { part: "E", meaning: "root_letter" },
         { part: "b", meaning: "accidental" },
         { part: "b", meaning: "accidental" },
-        { part: "-", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
       ]);
     });
   });
 
-   describe("bass", () => {
+  describe("bass", () => {
     it("C/G", () => {
       expect(interpretChord("C/G")).toEqual([
         { part: "C", meaning: "root_letter" },
@@ -87,16 +87,26 @@ describe("interpretChords", () => {
     it("Am/G", () => {
       expect(interpretChord("Am/G")).toEqual([
         { part: "A", meaning: "root_letter" },
-        { part: "m", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
         { part: "/", meaning: "slash" },
         { part: "G", meaning: "bass_letter" }
+      ]);
+    });
+
+     it("Am/G#", () => {
+      expect(interpretChord("Am/G#")).toEqual([
+        { part: "A", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "/", meaning: "slash" },
+        { part: "G", meaning: "bass_letter" },
+        { part: "#", meaning: "bass_accidental" }
       ]);
     });
 
     it("E-/D", () => {
       expect(interpretChord("E-/D")).toEqual([
         { part: "E", meaning: "root_letter" },
-        { part: "-", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
         { part: "/", meaning: "slash" },
         { part: "D", meaning: "bass_letter" }
       ]);
@@ -111,7 +121,7 @@ describe("interpretChords", () => {
       ]);
     });
 
-     it("A##/Bb", () => {
+    it("A##/Bb", () => {
       expect(interpretChord("A##/Bb")).toEqual([
         { part: "A", meaning: "root_letter" },
         { part: "#", meaning: "accidental" },
@@ -126,7 +136,7 @@ describe("interpretChords", () => {
         { part: "A", meaning: "root_letter" },
         { part: "#", meaning: "accidental" },
         { part: "#", meaning: "accidental" },
-        { part: "min", meaning: "minor_symbol" },
+        { part: "min", meaning: "minor_quality" },
         { part: "/", meaning: "slash" },
         { part: "B", meaning: "bass_letter" },
         { part: "b", meaning: "bass_accidental" }
@@ -145,6 +155,116 @@ describe("interpretChords", () => {
       ]);
     });
   });
+
+  describe("extensions", () => {
+    it("C7", () => {
+      expect(interpretChord("C7")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+
+     it("Cmaj", () => {
+      expect(interpretChord("Cmaj")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "maj", meaning: "major_seventh_marker" }
+      ]);
+    });
+
+    it("A11", () => {
+      expect(interpretChord("A11")).toEqual([
+        { part: "A", meaning: "root_letter" },
+        { part: "11", meaning: "extension" }
+      ]);
+    });
+
+    it("B13", () => {
+      expect(interpretChord("B13")).toEqual([
+        { part: "B", meaning: "root_letter" },
+        { part: "13", meaning: "extension" }
+      ]);
+    });
+
+    it("CminMaj7", () => {
+      expect(interpretChord("CminMaj7")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "maj", meaning: "major_seventh_marker" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+
+    it("Cm(maj7)", () => {
+      expect(interpretChord("Cm(maj7)")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "maj", meaning: "major_seventh_marker" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+
+     it("Cmmaj7", () => {
+      expect(interpretChord("Cmmaj7")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "maj", meaning: "major_seventh_marker" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+
+    it("C7/E", () => {
+      expect(interpretChord("C7/E")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "7", meaning: "extension" },
+        { part: "/", meaning: "slash" },
+        { part: "E", meaning: "bass_letter" }
+      ]);
+    });
+
+    it("Dm9", () => {
+      expect(interpretChord("Dm9")).toEqual([
+        { part: "D", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "9", meaning: "extension" }
+      ]);
+    });
+
+    it("Bm9/E", () => {
+      expect(interpretChord("Bm9/E")).toEqual([
+        { part: "B", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "9", meaning: "extension" },
+        { part: "/", meaning: "slash" },
+        { part: "E", meaning: "bass_letter" }
+      ]);
+    });
+
+
+    it("Cmaj7 (CM7) (CΔ7)", () => {
+      expect(interpretChord("Cmaj7")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "maj", meaning: "major_seventh_marker" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+
+    it("CmM7", () => {
+      expect(interpretChord("CmM7")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "min", meaning: "minor_quality" },
+        { part: "maj", meaning: "major_seventh_marker" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+
+     it("CΔ7", () => {
+      expect(interpretChord("CΔ7")).toEqual([
+        { part: "C", meaning: "root_letter" },
+        { part: "maj", meaning: "major_seventh_marker" },
+        { part: "7", meaning: "extension" }
+      ]);
+    });
+  })
 
   describe("errors", () => {
     it("empty string", () => {
@@ -171,6 +291,11 @@ describe("interpretChords", () => {
       expect(() => interpretChord("A##min/Bb#")).toThrow();
       expect(() => interpretChord("A##min/Bm")).toThrow();
       expect(() => interpretChord("A##min/B-")).toThrow();
+    });
+
+    it("Inverse extensions", () => {
+      expect(() => interpretChord("C7m")).toThrow();
+      expect(() => interpretChord("C7maj")).toThrow();
     });
   });
 });

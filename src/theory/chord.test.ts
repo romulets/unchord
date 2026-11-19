@@ -16,7 +16,7 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
+      expect(chord.tones).toMatchObject([n("C", 1, "perfect"), n("E", 3, "major"), n("G", 5, "perfect")]);
       expect(chord.scale).toEqual([
         {
           degree: 1,
@@ -24,6 +24,7 @@ describe("Chord scale generation", () => {
           pitchClass: 0,
           role: "root",
           spelledNote: "C",
+          tone: true,
         },
         {
           degree: 2,
@@ -31,6 +32,7 @@ describe("Chord scale generation", () => {
           pitchClass: 2,
           role: "second",
           spelledNote: "D",
+          tone: false,
         },
         {
           degree: 3,
@@ -38,6 +40,7 @@ describe("Chord scale generation", () => {
           pitchClass: 4,
           role: "third",
           spelledNote: "E",
+          tone: true,
         },
         {
           degree: 4,
@@ -45,6 +48,7 @@ describe("Chord scale generation", () => {
           pitchClass: 5,
           role: "fourth",
           spelledNote: "F",
+          tone: false,
         },
         {
           degree: 5,
@@ -52,6 +56,7 @@ describe("Chord scale generation", () => {
           pitchClass: 7,
           role: "fifth",
           spelledNote: "G",
+          tone: true,
         },
         {
           degree: 6,
@@ -59,6 +64,7 @@ describe("Chord scale generation", () => {
           pitchClass: 9,
           role: "sixth",
           spelledNote: "A",
+          tone: false,
         },
         {
           degree: 7,
@@ -66,6 +72,7 @@ describe("Chord scale generation", () => {
           pitchClass: 11,
           role: "seventh",
           spelledNote: "B",
+          tone: false,
         },
       ]);
     });
@@ -75,7 +82,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("C#", 1, "augmented"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/C##", () => {
@@ -83,7 +89,7 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("C##", 1, "doubly augmented"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
+      expect(chord.tones).toMatchObject([n("C", 1, "perfect"), n("E", 3, "major"), n("G", 5, "perfect")]);
     });
 
     test("Cb/E#", () => {
@@ -91,7 +97,7 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("Cb", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("E#", 3, "doubly augmented"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
+      expect(chord.tones).toMatchObject([n("Cb", 1, "perfect"), n("Eb", 3, "major"), n("Gb", 5, "perfect")]);
     });
 
     test("C/Bb", () => {
@@ -99,7 +105,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("Bb", 7, "minor"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/Cbb", () => {
@@ -107,7 +112,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("Cbb", 8, "doubly diminished"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C#/Ebb", () => {
@@ -115,7 +119,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C#", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("Ebb", 3, "doubly diminished"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/Cb", () => {
@@ -123,7 +126,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("Cb", 8, "diminished"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("D/C", () => {
@@ -131,7 +133,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("D", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("C", 7, "minor"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/B#", () => {
@@ -139,7 +140,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("B#", 7, "augmented"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/E", () => {
@@ -147,7 +147,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("E", 3, "major"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/D", () => {
@@ -155,7 +154,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("D", 2, "major"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/G", () => {
@@ -163,7 +161,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("G", 5, "perfect"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/Bb", () => {
@@ -171,7 +168,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("Bb", 7, "minor"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("B/Bb", () => {
@@ -179,7 +175,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("B", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("Bb", 8, "diminished"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C/F#", () => {
@@ -187,7 +182,6 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("major");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("F#", 4, "augmented"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
     });
 
     test("C#", () => {
@@ -367,7 +361,7 @@ describe("Chord scale generation", () => {
       expect(chord.quality).toBe("minor");
       expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"));
       expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"));
-      expect(chord.toneDegrees).toEqual([1, 3, 5]);
+      expect(chord.tones).toMatchObject([n("C", 1, "perfect"), n("Eb", 3, "minor"), n("G", 5, "perfect")]);
       expect(chord.scale).toEqual([
         {
           degree: 1,
@@ -375,6 +369,7 @@ describe("Chord scale generation", () => {
           pitchClass: 0,
           role: "root",
           spelledNote: "C",
+          tone: true,
         },
         {
           degree: 2,
@@ -382,6 +377,7 @@ describe("Chord scale generation", () => {
           pitchClass: 2,
           role: "second",
           spelledNote: "D",
+          tone: false,
         },
         {
           degree: 3,
@@ -389,6 +385,7 @@ describe("Chord scale generation", () => {
           pitchClass: 3,
           role: "third",
           spelledNote: "Eb",
+          tone: true,
         },
         {
           degree: 4,
@@ -396,6 +393,7 @@ describe("Chord scale generation", () => {
           pitchClass: 5,
           role: "fourth",
           spelledNote: "F",
+          tone: false,
         },
         {
           degree: 5,
@@ -403,6 +401,7 @@ describe("Chord scale generation", () => {
           pitchClass: 7,
           role: "fifth",
           spelledNote: "G",
+          tone: true,
         },
         {
           degree: 6,
@@ -410,6 +409,7 @@ describe("Chord scale generation", () => {
           pitchClass: 8,
           role: "sixth",
           spelledNote: "Ab",
+          tone: false,
         },
         {
           degree: 7,
@@ -417,6 +417,7 @@ describe("Chord scale generation", () => {
           pitchClass: 10,
           role: "seventh",
           spelledNote: "Bb",
+          tone: false,
         },
       ]);
     });
@@ -561,6 +562,124 @@ describe("Chord scale generation", () => {
       const chord = new Chord("C/G");
       expect(chord.inversion).toMatchObject({ degree: 2 });
     });
-  })
+  });
+
+  describe("Extensions", () => {
+    test("C7", () => {
+      const chord = new Chord("C7")
+      expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("C", 1, "perfect"),
+        n("E", 3, "major"),
+        n("G", 5, "perfect"),
+        n("Bb", 7, "minor")
+      ]);
+    });
+
+    test("C9", () => {
+      const chord = new Chord("C9")
+      expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("C", 1, "perfect"),
+        n("E", 3, "major"),
+        n("G", 5, "perfect"),
+        n("Bb", 7, "minor"),
+        n("D", 9, "major")
+      ]);
+    });
+
+    test("C11", () => {
+      const chord = new Chord("C11")
+      expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("C", 1, "perfect"),
+        n("E", 3, "major"),
+        n("G", 5, "perfect"),
+        n("Bb", 7, "minor"),
+        n("D", 9, "major"),
+        n("F", 11, "perfect"),
+      ]);
+    });
+
+    test("C13", () => {
+      const chord = new Chord("C13")
+      expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("C", 1, "perfect"),
+        n("E", 3, "major"),
+        n("G", 5, "perfect"),
+        n("Bb", 7, "minor"),
+        n("D", 9, "major"),
+        n("F", 11, "perfect"),
+        n("A", 13, "major"),
+      ]);
+    });
+
+    test("Cmaj7", () => {
+      const chord = new Chord("Cmaj7")
+      expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("C", 1, "perfect"),
+        n("E", 3, "major"),
+        n("G", 5, "perfect"),
+        n("B", 7, "major"),
+      ]);
+    });
+
+     test("Cm(maj7)/E", () => {
+      const chord = new Chord("Cm(maj7)/E")
+      expect(chord.rootNote).toMatchObject(n("C", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("E", 3, "major"))
+      expect(chord.tones).toMatchObject([
+        n("C", 1, "perfect"),
+        n("Eb", 3, "minor"),
+        n("G", 5, "perfect"),
+        n("B", 7, "major"),
+      ]);
+    });
+
+    test("F#7", () => {
+      const chord = new Chord("F#7")
+      expect(chord.rootNote).toMatchObject(n("F#", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("F#", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("F#", 1, "perfect"),
+        n("A#", 3, "major"),
+        n("C#", 5, "perfect"),
+        n("E", 7, "minor"),
+      ]);
+    });
+
+    test("Dbmaj9", () => {
+      const chord = new Chord("Dbmaj9")
+      expect(chord.rootNote).toMatchObject(n("Db", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("Db", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("Db", 1, "perfect"),
+        n("F", 3, "major"),
+        n("Ab", 5, "perfect"),
+        n("C", 7, "major"),
+        n("Eb", 9, "major"),
+      ]);
+    });
+
+    test("B9", () => {
+      const chord = new Chord("B9")
+      expect(chord.rootNote).toMatchObject(n("B", 1, "perfect"))
+      expect(chord.bassNote).toMatchObject(n("B", 1, "perfect"))
+      expect(chord.tones).toMatchObject([
+        n("B", 1, "perfect"),
+        n("D#", 3, "major"),
+        n("F#", 5, "perfect"),
+        n("A", 7, "minor"),
+        n("C#", 9, "major"),
+      ]);
+    });
+  });
 })
 
