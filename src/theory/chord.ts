@@ -49,7 +49,7 @@ interface Interval {
   quality: IntervalQuality
 }
 
-interface RelativeNote {
+export interface RelativeNote {
   spelledNote: string,
   pitchClass: number,
   intervalFromRoot: Interval,
@@ -57,6 +57,10 @@ interface RelativeNote {
 interface ScaleRelativeNote extends RelativeNote {
   degree: number,
   role: string,
+}
+
+interface Inversion {
+  degree: number,
 }
 
 export default class Chord {
@@ -67,6 +71,7 @@ export default class Chord {
   readonly quality: ChordQuality;
   readonly scale: ScaleRelativeNote[];
   readonly toneDegrees: number[];
+  readonly inversion?: Inversion;
 
   constructor(chord: string) {
     this.chordSymbol = chord;
@@ -76,6 +81,7 @@ export default class Chord {
     this.scale = this.buildScale(SCALES_BY_CHORD_QUALITY[this.quality])
     this.rootNote = this.scale[0];
     this.bassNote = bass == root ? this.scale[0] : this.findRelativeToRoot(this.scale[0], bass);
+    this.inversion = this.determineInversion(); 
   }
 
   private interpretChord() {
@@ -207,6 +213,24 @@ export default class Chord {
 
   public getTones(): ScaleRelativeNote[] {
     return this.toneDegrees.map(degree => this.scale.find(sd => sd.degree === degree)!);
+  }
+
+  private determineInversion(): Inversion | undefined {
+    if (this.rootNote === this.bassNote) {
+      return undefined;
+    }
+
+    const bassDegree = this.getTones().find(sd => sd.spelledNote === this.bassNote.spelledNote)?.degree;
+    switch(bassDegree) {
+      case 3:
+        return { degree: 1 };
+      case 5:
+        return { degree: 2 };
+      case 7:
+        return { degree: 3 };
+      default:
+        return undefined;
+    }
   }
 }
 

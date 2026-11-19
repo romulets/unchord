@@ -541,6 +541,26 @@ describe("Chord scale generation", () => {
 
   });
 
+  describe("Inversion", () => {
+    test("Root position", () => {
+      const chord = new Chord("C");
+      expect(chord.inversion).toBeUndefined();
+    });
 
+    test("Not an inversion", () => {
+      const chord = new Chord("C/Fb");
+      expect(chord.inversion).toBeUndefined();
+    });
+
+    test("First inversion", () => {
+      const chord = new Chord("C/E");
+      expect(chord.inversion).toMatchObject({ degree: 1 });
+    });
+
+    test("Second inversion", () => {
+      const chord = new Chord("C/G");
+      expect(chord.inversion).toMatchObject({ degree: 2 });
+    });
+  })
 })
 
