@@ -3,6 +3,7 @@ import './App.css'
 import { getChord, type Chord } from './theory';
 import { ScaleBoard } from './components/ScaleBoard';
 import { FretBoard } from './components/FretBoard';
+import { ColorLegend } from './components/ColorLegend';
 
 function App() {
   const [chordInput, setChordInput] = useState<string>("");
@@ -39,6 +40,7 @@ function App() {
       
       <ScaleBoard chord={chord} />
       <FretBoard chord={chord} />
+      <ColorLegend />
     </> 
   )
 }

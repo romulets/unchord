@@ -1,0 +1,65 @@
+.color-legend {
+  background-color: var(--fret-color);
+  color: #fff;
+  display: inline-block;
+  margin-top: 20px;
+  padding: 5px 10px;
+}
+
+.color-legend p {
+  margin-top: 0px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.color-legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9em;
+}
+
+.color-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.color-legend .swatch {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.color-legend .swatch.tone {
+  background-color: var(--tone-color);
+}
+
+.color-legend .swatch.root {
+  background-color: var(--root-color);
+}
+
+.color-legend .swatch.extension {
+  background-color: var(--extension-color);
+}
+
+.color-legend .swatch.bass {
+  background-color: var(--bass-color);
+}
+
+.color-legend .swatch.tone.bass {
+  background-color: var(--tone-color);
+  outline: 2px solid var(--bass-color);
+}
+
+.color-legend .swatch.root.bass {
+  background-color: var(--root-color);
+  outline: 2px solid var(--bass-color);
+}
+
+.color-legend .swatch.tone.extension {
+  background-color: var(--tone-color);
+  outline: 2px solid var(--extension-color);
+}
